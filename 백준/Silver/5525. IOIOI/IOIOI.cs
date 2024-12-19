@@ -13,51 +13,33 @@ namespace ConsoleApp1
 
             int[] table = new int[length + 1];
             char[] io = new char[length];
-            
-            for(int i = 0; i < length; i++)
+
+            for (int i = 0; i < length; i++)
             {
                 if (i % 2 == 0)
                     io[i] = 'I';
                 else
                     io[i] = 'O';
             }
-            
-            table[0] = -1;
-            table[1] = 0;
-            for(int i = 2; i < length + 1; i++)
-            {
-                if(i % 2 == 1)
-                {
-                    table[i] = i - 2;
-                }
-                else
-                {
-                    table[i] = 0;
-                }
-            }
 
-            int flag = 0;
             int total = 0;
+            int count = 0;
 
-            while(flag <= s.Length - length)
+            for(int i = 0; i < s.Length; i++)
             {
-                int matchLength = 0;
+                if (s[i] == 'O')
+                    continue;
 
-                for(int i = 0; i < length; i++)
+                while (i < s.Length - 2 && s[i + 1] == 'O' && s[i+2] == 'I')
                 {
-                    if (s[flag + i] != io[i])
-                    {
-                        break;
-                    }
-                    matchLength++;
+                    count++;
+                    i+=2;
                 }
 
-                flag += (matchLength - table[matchLength]);
-
-                if (matchLength == length)
-                    total++;
+                if (count >= N)
+                    total += (count - N + 1);
+                count = 0;
             }
-
             Console.WriteLine(total);
         }
     }
