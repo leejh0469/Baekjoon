@@ -1,81 +1,81 @@
+using System;
+using System.IO;
+
 namespace Baekjoon18111
 {
     internal class Program
     {
         static void Main(string[] args)
         {
-            int N, M, B;
+            // 빠른 입력을 위해 StreamReader 사용
+            var sr = new StreamReader(Console.OpenStandardInput());
+            string[] input = sr.ReadLine().Split();
 
-            int[] input = Array.ConvertAll(Console.ReadLine().Split(), int.Parse);
-
-            N = input[0];
-            M = input[1];
-            B = input[2];
+            int N = int.Parse(input[0]);
+            int M = int.Parse(input[1]);
+            int B = int.Parse(input[2]);
 
             int[,] ground = new int[N, M];
+            int minHeight = 257;
             int maxHeight = -1;
 
-            for(int i = 0; i < N; i++)
+            // 땅의 높이를 입력받으면서 최소/최대 높이를 찾음
+            for (int i = 0; i < N; i++)
             {
-                input = Array.ConvertAll(Console.ReadLine().Split(), int.Parse);
-
-
-                for(int j = 0; j < M; j++)
+                input = sr.ReadLine().Split();
+                for (int j = 0; j < M; j++)
                 {
-                    ground[i, j] = input[j];
-
-                    if (input[j] > maxHeight)
-                        maxHeight = input[j];
+                    int height = int.Parse(input[j]);
+                    ground[i, j] = height;
+                    if (height < minHeight) minHeight = height;
+                    if (height > maxHeight) maxHeight = height;
                 }
             }
 
-            int time = int.MaxValue;
-            int maxHeightWhenWorkDone = maxHeight;
+            int minTime = int.MaxValue;
+            int resultHeight = -1;
 
-            for(int i = maxHeight; i >= 0; i--)
+            // 가능한 모든 높이에 대해 완전 탐색 (Brute-force)
+            // 최소 높이 ~ 최대 높이 범위만 탐색해도 충분
+            for (int h = minHeight; h <= maxHeight; h++)
             {
-                int needBlockNum = 0;
-                int haveBlockNum = B;
+                int blocksToAdd = 0;
+                int blocksToRemove = 0;
 
-                for(int j = 0; j < N; j++)
+                // 땅 전체를 **한 번만** 순회
+                for (int i = 0; i < N; i++)
                 {
-                    for(int k = 0;  k < M; k++)
+                    for (int j = 0; j < M; j++)
                     {
-                        needBlockNum += Math.Max(i - ground[j, k], 0);
-                        haveBlockNum += Math.Max(ground[j, k] - i, 0);
-                    }
-                }
+                        int diff = ground[i, j] - h;
 
-                if (needBlockNum > haveBlockNum)
-                    continue;
-
-                int calTime = 0;
-                int workTimeForEachCoor;
-                for(int j = 0; j < N; j++)
-                {
-                    for(int k = 0;k < M; k++)
-                    {
-                        workTimeForEachCoor = ground[j, k] - i;
-
-                        if (workTimeForEachCoor > 0)
+                        if (diff > 0) // 제거해야 할 블록
                         {
-                            calTime += workTimeForEachCoor * 2;
+                            blocksToRemove += diff;
                         }
-                        else if(workTimeForEachCoor < 0)
+                        else if (diff < 0) // 추가해야 할 블록
                         {
-                            calTime += Math.Abs(workTimeForEachCoor);
+                            blocksToAdd += -diff;
                         }
                     }
                 }
 
-                if (time > calTime)
+                // 현재 인벤토리(B)와 제거할 블록으로 필요한 블록을 채울 수 있는지 확인
+                if (B + blocksToRemove >= blocksToAdd)
                 {
-                    time = calTime;
-                    maxHeightWhenWorkDone = i;
+                    // 시간 계산: 제거는 2초, 추가는 1초
+                    int currentTime = blocksToRemove * 2 + blocksToAdd;
+
+                    // 더 짧은 시간이 걸리거나, 시간이 같으면서 높이가 더 높은 경우 갱신
+                    if (currentTime <= minTime)
+                    {
+                        minTime = currentTime;
+                        resultHeight = h;
+                    }
                 }
             }
 
-            Console.WriteLine(time + " " + maxHeightWhenWorkDone);
+            Console.WriteLine(minTime + " " + resultHeight);
         }
     }
 }
